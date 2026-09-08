@@ -1,12 +1,15 @@
 
-use std::{any::Any, marker::PhantomData};
+use std::any::Any;
+use std::marker::PhantomData;
 
-use crate::{ConstId, iter::IterImpl, map_static::TypeMap, mapping::{self, Mapper}};
-
-pub type DynamicTypeSet = DynamicTypeMap<mapping::ReflexiveMapper>;
+use crate::ConstId;
+use crate::iter::IterImpl;
+use crate::mapping::Mapper;
+use crate::mapping::TypeKeyMapper;
+use crate::type_map::TypeMap;
 
 #[repr(transparent)]
-pub struct DynamicTypeMap<M = mapping::TypeKeyMapper> {
+pub struct TypeDictionary<M = TypeKeyMapper> {
     map: TypeMap<Box<dyn Any>>,
     mapper: PhantomData<M>,
 }
@@ -20,7 +23,7 @@ pub(crate) fn cast_ref<T: 'static>(value: &Box<dyn Any>) -> &T { unsafe { value.
 #[inline(always)]
 pub(crate) fn cast_mut<T: 'static>(value: &mut Box<dyn Any>) -> &mut T { unsafe { value.downcast_mut().unwrap_unchecked() } }
 
-impl<M> DynamicTypeMap<M> {
+impl<M> TypeDictionary<M> {
     #[inline(always)]
     pub fn new() -> Self { Self { map: TypeMap::new(), mapper: PhantomData } }
     
@@ -75,7 +78,7 @@ impl<M> DynamicTypeMap<M> {
     #[inline(always)] pub fn iter_mut(&mut self) -> <&mut Self as IntoIterator>::IntoIter { self.into_iter() }
 }
 
-impl<M> IterImpl for DynamicTypeMap<M> {
+impl<M> IterImpl for TypeDictionary<M> {
     type Inner = TypeMap<Box<dyn Any>>;
     
     #[inline(always)] fn get_inner(self) -> Self::Inner { self.map }

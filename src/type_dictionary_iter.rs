@@ -1,11 +1,18 @@
-use std::{any::Any, marker::PhantomData};
-use crate::{ConstId, mapping::Mapper, map_dynamic::{DynamicTypeMap, cast, cast_ref, cast_mut}, iter::*, iter_static};
+
+use std::any::Any;
+use std::marker::PhantomData;
+
+use crate::ConstId;
+use crate::mapping::Mapper;
+use crate::type_dictionary::*;
+use crate::iter::*;
+use crate::type_map_iter;
 
 pub mod owned {
     use super::*;
     
     pub struct Entry<M> {
-        pub(crate) entry: iter_static::owned::Entry<Box<dyn Any>>,
+        pub(crate) entry: type_map_iter::owned::Entry<Box<dyn Any>>,
         pub(crate) mapper: PhantomData<M>,
     }
     
@@ -29,7 +36,7 @@ pub mod reference {
     
     #[repr(transparent)]
     pub struct Entry<'a, M> {
-        pub(crate) entry: iter_static::reference::Entry<'a, Box<dyn Any>>,
+        pub(crate) entry: type_map_iter::reference::Entry<'a, Box<dyn Any>>,
         pub(crate) mapper: PhantomData<M>,
     }
 
@@ -46,7 +53,7 @@ pub mod mutable {
     use super::*;
     
     pub struct Entry<'a, M> {
-        pub(crate) entry: iter_static::mutable::Entry<'a, Box<dyn Any>>,
+        pub(crate) entry: type_map_iter::mutable::Entry<'a, Box<dyn Any>>,
         pub(crate) mapper: PhantomData<M>,
     }
 
@@ -62,14 +69,14 @@ pub mod mutable {
     }
 }
 
-impl<M> IterImplMap for DynamicTypeMap<M> {
+impl<M> IterImplMap for TypeDictionary<M> {
     type Item = owned::Entry<M>;
     
     #[inline(always)]
     fn iter_map_item(entry: <Self::Inner as IntoIterator>::Item) -> Self::Item { owned::Entry { entry, mapper: PhantomData } }
 }
 
-impl<'a, M> IterImplRef<'a> for DynamicTypeMap<M> {
+impl<'a, M> IterImplRef<'a> for TypeDictionary<M> {
     type Ref = reference::Entry<'a, M>;
     type Mut = mutable::Entry<'a, M>;
     
@@ -80,4 +87,4 @@ impl<'a, M> IterImplRef<'a> for DynamicTypeMap<M> {
     fn iter_map_mut(entry: <&'a mut Self::Inner as IntoIterator>::Item) -> Self::Mut { mutable::Entry { entry, mapper: PhantomData } }
 }
 
-crate::impl_iter!({M} DynamicTypeMap<M>);
+crate::impl_iter!({M} TypeDictionary<M>);

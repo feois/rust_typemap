@@ -13,7 +13,7 @@ pub trait IterImplMap: IterImpl where Self::Inner: IntoIterator {
     fn iter_map_item(value: <Self::Inner as IntoIterator>::Item) -> Self::Item;
 }
 
-pub trait IterImplRef<'a>: IterImpl where &'a Self::Inner: IntoIterator + 'a, &'a mut Self::Inner: IntoIterator + 'a {
+pub trait IterImplRef<'a>: IterImpl where Self::Inner: 'a, &'a Self::Inner: IntoIterator, &'a mut Self::Inner: IntoIterator {
     type Ref;
     type Mut;
     

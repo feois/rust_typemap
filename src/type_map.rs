@@ -1,6 +1,8 @@
-use std::{any::TypeId, collections::HashMap};
+use std::any::TypeId;
+use std::collections::HashMap;
 
-use crate::{ConstId, iter::IterImpl};
+use crate::ConstId;
+use crate::iter::IterImpl;
 
 #[repr(transparent)]
 pub struct TypeMap<T> { pub(crate) map: HashMap<TypeId, T> }
@@ -77,37 +79,6 @@ impl<T> TypeMap<T> {
 
 impl<T> IterImpl for TypeMap<T> {
     type Inner = HashMap<TypeId, T>;
-    
-    #[inline(always)] fn get_inner(self) -> Self::Inner { self.map }
-    #[inline(always)] fn get_inner_ref(&self) -> &Self::Inner { &self.map }
-    #[inline(always)] fn get_inner_mut(&mut self) -> &mut Self::Inner { &mut self.map }
-}
-
-#[repr(transparent)]
-pub struct TypeSet { map: TypeMap<()> }
-
-impl TypeSet {
-    #[inline(always)]
-    pub fn new() -> Self { Self { map: TypeMap::new() } }
-    
-    #[inline(always)]
-    pub fn with_capacity(capacity: usize) -> Self { Self { map: TypeMap::with_capacity(capacity) } }
-    
-    #[inline(always)]
-    pub fn has<T: ConstId>(&self) -> bool { self.map.has::<T>() }
-    
-    // returns true if there is no element before
-    #[inline(always)]
-    pub fn add<T: ConstId>(&mut self) -> bool { self.map.add::<T>(()) }
-    
-    pub fn remove<T: ConstId>(&mut self) -> bool { self.map.take::<T>().is_some() }
-    
-    #[inline(always)] pub fn iter(&self) -> <&Self as IntoIterator>::IntoIter { self.into_iter() }
-    #[inline(always)] pub fn iter_mut(&mut self) -> <&mut Self as IntoIterator>::IntoIter { self.into_iter() }
-}
-
-impl IterImpl for TypeSet {
-    type Inner = TypeMap<()>;
     
     #[inline(always)] fn get_inner(self) -> Self::Inner { self.map }
     #[inline(always)] fn get_inner_ref(&self) -> &Self::Inner { &self.map }
